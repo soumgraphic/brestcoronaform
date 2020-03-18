@@ -1,0 +1,62 @@
+<div class="card mt-4" xmlns:date="http://www.w3.org/1999/xhtml">
+  <div class="card-header">
+    #COVID19 - Déplacement dérogatoire
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Formulaire attestation de déplacement dérogatoire</h5>
+    <p class="card-text">
+      En application de l’article 1er du décret du 16 mars 2020, chaque déplacement sur le territoire national Français
+      nécessite une attestation de déplacement dérogatoire.<br>
+      Vous pouvez remplir le formulaire ci-dessous pour obtenir votre attestation si réellement vous êtes dans le besoin.
+    </p>
+    <form #formcontrol="ngForm">
+      <div class="form-group">
+        <label for="name">Mme / M.</label>
+        <input type="text" class="form-control" id="name" name="fullname" [(ngModel)]="request.fullname" placeholder="Entrer votre nom complet" required>
+        <small id="nameHelp" class="form-text text-muted">Le nom fourni sera votre signature</small>
+      </div>
+      <div class="form-group">
+        <label for="birthdate">Né(e) le</label>
+        <input type="date" class="form-control" id="birthdate" name="birthdate" [(ngModel)]="request.birthdate" placeholder="Entrer votre nom complet"  required>
+      </div>
+      <div class="form-row">
+        <div class="col-md-6 mb-3">
+          <label for="address">Adresse</label>
+          <input type="text" class="form-control" id="address" name="address" [(ngModel)]="request.address" placeholder="Entrer votre adresse" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="city">Ville</label>
+          <input type="text" class="form-control" id="city" name="city" placeholder="Votre ville" [(ngModel)]="request.city" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="postalcode">Code postal</label>
+          <input type="text" class="form-control" id="postalcode" name="postalcode" placeholder="Votre code postal" [(ngModel)]="request.postalcode" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reasonSelection">Motif de déplacement</label>
+        <select class="form-control" id="reasonSelection" name="reasonSelection" [(ngModel)]="request.reason" required>
+          <option value="" selected disabled>Selectionner le motif de déplacement</option>
+          <option *ngFor="let reason of REASON; index as i" [value]="reason.value">
+            {{reason.label}}
+          </option>
+        </select>
+      </div>
+    </form>
+    <button (click)="generatePdf()" [disabled]="!formcontrol.valid" class="btn btn-outline-primary">Télécharger le formulaire</button>
+  </div>
+</div>
+<br>
+<blockquote class="blockquote mb-0">
+  <div class="blockquote-footer">Developed with <3 by
+    <a href="https://www.linkedin.com/in/abdourahamane-diarra-2b5218188/" target="_blank">
+      @Abdourahamane
+    </a>
+    &
+    <a href="https://www.linkedin.com/in/soumailaadiarra/" target="_blank">
+      @Soumaila
+    </a>
+  </div>
+</blockquote>
+
+<br>
