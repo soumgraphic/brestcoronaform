@@ -9,6 +9,7 @@ import {AppRoutingModule} from './app-routing.module';
 import { NotfoundComponent } from './components/notfound/notfound.component';
 import { FrenchDateFormatPipe } from './pipe/french-date-format.pipe';
 import {DatePipe} from '@angular/common';
+import {SignaturePadModule} from 'angular2-signaturepad';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import {DatePipe} from '@angular/common';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    SignaturePadModule
   ],
   providers: [
     DatePipe

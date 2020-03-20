@@ -1,10 +1,12 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import {AttestationRequest} from '../../model/attestation-request';
 import {DatePipe} from '@angular/common';
 import pdfFonts from 'src/assets/fonts/pdkmake-latoblack/custom-fonts-latoblack-rnsmiles.js';
 import {PDFDocument, StandardFonts} from 'pdf-lib';
 import {Reason} from '../../model/reason';
+import SignaturePad from 'signature_pad';
+// import {SignaturePad} from 'angular2-signaturepad/signature-pad';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -13,7 +15,7 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit  {
 
   request = new AttestationRequest();
 
@@ -40,18 +42,50 @@ export class HomeComponent implements OnInit {
       value: Reason.INDIVIDUAL_PHYSICAL_ACTIVITY
     }];
 
+  // Signature connection to html canvas
+  @ViewChild('sPad', {static: true}) signaturePadElement;
+  signaturePad: any;
+
   constructor(public datepipe: DatePipe) {}
 
   ngOnInit() {
   }
 
+  ngAfterViewInit(): void {
+    this.signaturePad = new SignaturePad(this.signaturePadElement.nativeElement);
+    this.resizeCanvas();
+  }
+
+  // Date conversion into french format
   frenchDateFormating() {
     const dateConverting = new Date(this.request.birthdate);
     return this.datepipe.transform(dateConverting, 'dd/MM/yyyy');
   }
 
+  // Signature pad clear
+  clear() {
+    this.signaturePad.clear();
+  }
+
+  getSignatureDataURI() {
+    if (this.signaturePad.isEmpty()) {
+      alert('Veuillez mettre votre signature s.v.p');
+    } else {
+      return this.signaturePad.toDataURL();
+    }
+  }
+
+  public resizeCanvas(): void {
+    // Canvas responsive management
+    const ratio: number = Math.max(window.devicePixelRatio || 1, 1);
+    const canvas: any = this.signaturePad._canvas;
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext('2d').scale(ratio, ratio);
+  }
+
   async generatePdf() {
-    // const existingPdfBytes = './assets/demande-template.pdf';
+    // Load pdf model
     const existingPdfBytes = await fetch('./assets/demande-template.pdf').then(res => res.arrayBuffer());
 
     // Load a PDFDocument from the existing PDF bytes
@@ -66,9 +100,6 @@ export class HomeComponent implements OnInit {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    // Get the width and height of the first page
-    const {width, height} = firstPage.getSize();
-
     const adressWithCityAndCodePostal = this.request.address + ', ' + this.request.postalcode + ' ' + this.request.city;
 
     // Draw user informations
@@ -76,6 +107,7 @@ export class HomeComponent implements OnInit {
     firstPage.drawText(this.frenchDateFormating(), { x: 135, y: 593, size: FONT_SIZE });
     firstPage.drawText(adressWithCityAndCodePostal || '', { x: 135, y: 559, size: FONT_SIZE });
 
+    // Draw user reason selection
     switch (this.request.reason) {
       case Reason.PRO:
         firstPage.drawText('x', { x: 51, y: 425, size: 17 });
@@ -97,7 +129,20 @@ export class HomeComponent implements OnInit {
     firstPage.drawText(this.request.city || '', { x: 375, y: 140, size: FONT_SIZE });
     firstPage.drawText(String(new Date().getDate()), { x: 478, y: 140, size: FONT_SIZE });
     firstPage.drawText(String(new Date().getMonth() + 1).padStart(2, '0'), { x: 502, y: 140, size: FONT_SIZE });
-    firstPage.drawText(this.request.fullname, { x: 455, y: 95, size: FONT_SIZE });
+    // User name signature draw
+    // firstPage.drawText(this.request.fullname, { x: 455, y: 95, size: FONT_SIZE });
+
+    // User signature image getting
+    const signature: string = this.getSignatureDataURI();
+    const signatureImg = await pdfDoc.embedPng(signature);
+    const signatureDim = signatureImg.scale(1 / (signatureImg.width / 150));
+
+    firstPage.drawImage(signatureImg, {
+      x: firstPage.getWidth() - signatureDim.width - 50,
+      y: 30,
+      width: signatureDim.width,
+      height: signatureDim.height
+    });
 
     // Serialize the PDFDocument to bytes (a Uint8Array)
     const pdfBytes = await pdfDoc.save();

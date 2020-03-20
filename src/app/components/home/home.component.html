@@ -1,4 +1,4 @@
-<div class="card mt-4" xmlns:date="http://www.w3.org/1999/xhtml">
+<div class="card mt-4">
   <div class="card-header">
     #COVID19 - Déplacement dérogatoire
   </div>
@@ -7,30 +7,36 @@
     <p class="card-text">
       En application de l’article 1er du décret du 16 mars 2020, chaque déplacement sur le territoire national Français
       nécessite une attestation de déplacement dérogatoire.<br>
-      Vous pouvez remplir le formulaire ci-dessous pour obtenir votre attestation si réellement vous êtes dans le besoin.
+      Vous pouvez remplir le formulaire ci-dessous pour obtenir votre attestation si réellement vous êtes dans le
+      besoin.
     </p>
     <form #formcontrol="ngForm">
       <div class="form-group">
         <label for="name">Mme / M.</label>
-        <input type="text" class="form-control" id="name" name="fullname" [(ngModel)]="request.fullname" placeholder="Entrer votre nom complet" required>
+        <input type="text" class="form-control" id="name" name="fullname" [(ngModel)]="request.fullname"
+               placeholder="Entrer votre nom complet" required>
         <small id="nameHelp" class="form-text text-muted">Le nom fourni sera votre signature</small>
       </div>
       <div class="form-group">
         <label for="birthdate">Né(e) le</label>
-        <input type="date" class="form-control" id="birthdate" name="birthdate" [(ngModel)]="request.birthdate" placeholder="Entrer votre nom complet"  required>
+        <input type="date" class="form-control" id="birthdate" name="birthdate" [(ngModel)]="request.birthdate"
+               placeholder="Entrer votre nom complet" required>
       </div>
       <div class="form-row">
         <div class="col-md-6 mb-3">
           <label for="address">Adresse</label>
-          <input type="text" class="form-control" id="address" name="address" [(ngModel)]="request.address" placeholder="Entrer votre adresse" required>
+          <input type="text" class="form-control" id="address" name="address" [(ngModel)]="request.address"
+                 placeholder="Entrer votre adresse" required>
         </div>
         <div class="col-md-3 mb-3">
           <label for="city">Ville</label>
-          <input type="text" class="form-control" id="city" name="city" placeholder="Votre ville" [(ngModel)]="request.city" required>
+          <input type="text" class="form-control" id="city" name="city" placeholder="Votre ville"
+                 [(ngModel)]="request.city" required>
         </div>
         <div class="col-md-3 mb-3">
           <label for="postalcode">Code postal</label>
-          <input type="text" class="form-control" id="postalcode" name="postalcode" placeholder="Votre code postal" [(ngModel)]="request.postalcode" required>
+          <input type="text" class="form-control" id="postalcode" name="postalcode" placeholder="Votre code postal"
+                 [(ngModel)]="request.postalcode" required>
         </div>
       </div>
       <div class="form-group">
@@ -42,8 +48,41 @@
           </option>
         </select>
       </div>
+
+      <div class="form-group">
+        <div class="modal-content col-md-6">
+          <div class="modal-header">
+            <h5 class="modal-title">Signez ci-dessous</h5>
+          </div>
+          <div class="modal-body">
+            <canvas #sPad class="card col-md-12" height="250"></canvas>
+            <div class="float-right mt-3">
+              <button type="button" class="btn btn-outline-danger btn-sm" (click)="clear()">Effacer la signature</button>
+              <!--<button class="btn btn-outline-danger btn-circle btn-circle-sm" (click)="clear()"><i class="fa fa-trash"></i></button>-->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--
+      <div class="card col-md-6">
+        <div class="card-body">
+         <h5 class="card-title">Card title</h5>
+          <p class="card-title">Signez dans le cadre ci-dessous</p>
+          <div class="card-text">
+            <canvas  width="450" height="200"></canvas>
+          </div>
+          <button class="btn btn-outline-danger btn-circle float-right" (click)="clear()"><i class="fa fa-trash"></i></button>
+          <button type="button" class="btn btn-outline-danger btn-sm" (click)="clear()">Effacer la signature</button>
+        </div>
+      </div>
+
+      <br> -->
+
     </form>
-    <button (click)="generatePdf()" [disabled]="!formcontrol.valid" class="btn btn-outline-primary">Télécharger le formulaire</button>
+    <button (click)="generatePdf()" [disabled]="!formcontrol.valid" class="btn btn-outline-primary btn-lg">Télécharger le
+      formulaire
+    </button>
   </div>
 </div>
 <br>
