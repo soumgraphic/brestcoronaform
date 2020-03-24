@@ -38,7 +38,7 @@ https://geo.api.gouv.fr/adresse
 #### Package:
 Signature_pad for digital signature. <br>
 PrimeNG for autocompletion and toast components. <br>
-PdfMake for PDF generation. <br>
+PdfMake for PDF generation.
 ####Developers
 [Abdourahamane DIARRA](https://www.linkedin.com/in/abdourahamane-diarra-2b5218188/) <br>
 [Soumaila A DIARRA](https://www.linkedin.com/in/soumailaadiarra/)
