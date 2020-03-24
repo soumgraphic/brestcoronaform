@@ -1,11 +1,16 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
-import {AttestationRequest} from '../../model/attestation-request';
+import {Address, AttestationRequest} from '../../model/attestation-request';
 import {DatePipe} from '@angular/common';
 import pdfFonts from 'src/assets/fonts/pdkmake-latoblack/custom-fonts-latoblack-rnsmiles.js';
 import {PDFDocument, StandardFonts} from 'pdf-lib';
 import {Reason} from '../../model/reason';
 import SignaturePad from 'signature_pad';
+import {FrenchCommonService} from '../../service/rest-api.gouv.fr/french-common.service';
+import {HttpClient} from '@angular/common/http';
+import {SearchAddressService} from '../../service/rest-api-adresse.data.gouv.fr/search-address.service';
+import {ResponseSearchAddress} from '../../service/rest-api-adresse.data.gouv.fr/model/ResponseSearchAddress';
+import {MessageService} from 'primeng';
 // import {SignaturePad} from 'angular2-signaturepad/signature-pad';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
@@ -18,6 +23,11 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 export class HomeComponent implements OnInit, AfterViewInit  {
 
   request = new AttestationRequest();
+
+  resultCommonSearch: any = [];
+  resultAddresses: Address[];
+
+  public responseSearchAddress: ResponseSearchAddress;
 
   // -- Reason List
   REASON = [
@@ -46,7 +56,9 @@ export class HomeComponent implements OnInit, AfterViewInit  {
   @ViewChild('sPad', {static: true}) signaturePadElement;
   signaturePad: any;
 
-  constructor(public datepipe: DatePipe) {}
+  constructor(public http: HttpClient, public frenchCommonService: FrenchCommonService,
+              public searchAddressService: SearchAddressService, public datepipe: DatePipe,
+              public ngPrimeMessageService: MessageService) {}
 
   ngOnInit() {
   }
@@ -54,6 +66,23 @@ export class HomeComponent implements OnInit, AfterViewInit  {
   ngAfterViewInit(): void {
     this.signaturePad = new SignaturePad(this.signaturePadElement.nativeElement);
     this.resizeCanvas();
+  }
+
+  searchFrenchCommon(event) {
+    this.frenchCommonService.searchFrenchCommon(event.query).subscribe((data: {}) => {
+      console.log(data);
+      this.resultCommonSearch = data;
+    });
+
+    console.log(this.resultCommonSearch[0].nom);
+  }
+
+  searchAddress(event) {
+    this.searchAddressService.searchFrenchAddress(event.query).subscribe(
+      responseSearchAddress => {
+        this.resultAddresses = responseSearchAddress;
+        console.log("DONNEE MAP CONTENT ", this.resultAddresses);
+      });
   }
 
   // Date conversion into french format
@@ -69,7 +98,8 @@ export class HomeComponent implements OnInit, AfterViewInit  {
 
   getSignatureDataURI() {
     if (this.signaturePad.isEmpty()) {
-      alert('Veuillez mettre votre signature s.v.p');
+      // -- ngToast generation for signature error
+      this.ngPrimeMessageService.add({key: 'signatureMissingToast', severity: 'error', summary: 'Erreur de signature', detail: 'Veuillez signer ci-dessous'});
     } else {
       return this.signaturePad.toDataURL();
     }
@@ -78,10 +108,11 @@ export class HomeComponent implements OnInit, AfterViewInit  {
   public resizeCanvas(): void {
     // Canvas responsive management
     const ratio: number = Math.max(window.devicePixelRatio || 1, 1);
-    const canvas: any = this.signaturePad._canvas;
+    const canvas: any = this.signaturePad.canvas;
     canvas.width = canvas.offsetWidth * ratio;
     canvas.height = canvas.offsetHeight * ratio;
     canvas.getContext('2d').scale(ratio, ratio);
+    this.signaturePad.clear();
   }
 
   async generatePdf() {
@@ -100,12 +131,12 @@ export class HomeComponent implements OnInit, AfterViewInit  {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    const adressWithCityAndCodePostal = this.request.address + ', ' + this.request.postalcode + ' ' + this.request.city;
+    const adressWithCityAndCodePostal = this.request.address + ', ' + this.request.address.postcode + ' ' + this.request.address.city;
 
     // Draw user informations
     firstPage.drawText(this.request.fullname || '', { x: 135, y: 622, size: FONT_SIZE });
     firstPage.drawText(this.frenchDateFormating(), { x: 135, y: 593, size: FONT_SIZE });
-    firstPage.drawText(adressWithCityAndCodePostal || '', { x: 135, y: 559, size: FONT_SIZE });
+    firstPage.drawText(this.request.address.label || '', { x: 135, y: 559, size: FONT_SIZE });
 
     // Draw user reason selection
     switch (this.request.reason) {
@@ -126,7 +157,7 @@ export class HomeComponent implements OnInit, AfterViewInit  {
         break;
     }
 
-    firstPage.drawText(this.request.city || '', { x: 375, y: 140, size: FONT_SIZE });
+    firstPage.drawText(this.request.address.city || '', { x: 375, y: 140, size: FONT_SIZE });
     firstPage.drawText(String(new Date().getDate()), { x: 478, y: 140, size: FONT_SIZE });
     firstPage.drawText(String(new Date().getMonth() + 1).padStart(2, '0'), { x: 502, y: 140, size: FONT_SIZE });
     // User name signature draw

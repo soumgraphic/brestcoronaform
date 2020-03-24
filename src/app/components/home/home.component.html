@@ -22,23 +22,57 @@
         <input type="date" class="form-control" id="birthdate" name="birthdate" [(ngModel)]="request.birthdate"
                placeholder="Entrer votre nom complet" required>
       </div>
+      <div class="form-group">
+        <span class="ui-fluid">
+           <p class="label mb-2">Adresse</p>
+            <p-autoComplete
+              styleClass="wid100"
+              [(ngModel)]="request.address"
+              name="addressName"
+              [suggestions]="resultAddresses"
+              (completeMethod)="searchAddress($event)" field="label"
+              [dropdown]="false"
+              [size]="30"
+              placeholder="Votre adresse..."
+              [minLength]="2">
+            </p-autoComplete>
+        </span>
+      </div>
+      <!--
       <div class="form-row">
+
         <div class="col-md-6 mb-3">
           <label for="address">Adresse</label>
-          <input type="text" class="form-control" id="address" name="address" [(ngModel)]="request.address"
+          <input type="text" class="form-control" id="address" name="address" [(ngModel)]="request.address.name"
                  placeholder="Entrer votre adresse" required>
         </div>
+
         <div class="col-md-3 mb-3">
           <label for="city">Ville</label>
           <input type="text" class="form-control" id="city" name="city" placeholder="Votre ville"
-                 [(ngModel)]="request.city" required>
+                 [(ngModel)]="request.address.city" required>
         </div>
         <div class="col-md-3 mb-3">
           <label for="postalcode">Code postal</label>
           <input type="text" class="form-control" id="postalcode" name="postalcode" placeholder="Votre code postal"
-                 [(ngModel)]="request.postalcode" required>
+                 [(ngModel)]="request.address.postcode" required>
         </div>
       </div>
+
+      <div class="form-group ">
+        <p-autoComplete
+                        [(ngModel)]="request.address2"
+                        [ngModelOptions]="{standalone: true}"
+                        [suggestions]="resultCommonSearch"
+                        (completeMethod)="searchFrenchCommon($event)" field="nom"
+                        [dropdown]="false"
+                        [size]="30"
+                        placeholder="Countries" [minLength]="2">
+        </p-autoComplete>
+        {{request.address2 ? request.address2.nom||request.address2 : 'none'}}
+      </div>
+      -->
+
       <div class="form-group">
         <label for="reasonSelection">Motif de déplacement</label>
         <select class="form-control" id="reasonSelection" name="reasonSelection" [(ngModel)]="request.reason" required>
@@ -55,7 +89,7 @@
             <h5 class="modal-title">Signez ci-dessous</h5>
           </div>
           <div class="modal-body">
-            <canvas #sPad class="card col-md-12" height="250"></canvas>
+            <canvas #sPad class="card col-md-12" height="200"></canvas>
             <div class="float-right mt-3">
               <button type="button" class="btn btn-outline-danger btn-sm" (click)="clear()">Effacer la signature</button>
               <!--<button class="btn btn-outline-danger btn-circle btn-circle-sm" (click)="clear()"><i class="fa fa-trash"></i></button>-->
@@ -63,6 +97,8 @@
           </div>
         </div>
       </div>
+
+      <p-toast key="signatureMissingToast"></p-toast>
 
       <!--
       <div class="card col-md-6">
@@ -85,6 +121,7 @@
     </button>
   </div>
 </div>
+
 <br>
 <blockquote class="blockquote mb-0">
   <div class="blockquote-footer">Developed with <3 by
